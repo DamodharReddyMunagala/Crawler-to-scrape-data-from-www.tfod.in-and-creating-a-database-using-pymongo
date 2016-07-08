@@ -33,14 +33,17 @@ projectGalleryTitleList = []
 projectGalleryImagesUrlsList = []
 projectGalleryImagesTitlesList = []
 
+#for Image Gallery
+projectGalleryTitleList1 = []
+
 
 for i in range(1,25):
     pages.append('https://www.tfod.in/professionals/design-consultants/p/' + str(i))
 
 def Page(url):
-    """
+    
     try:
-        BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     except FileNotFoundError:
         req = requests.get(url)
         req.raise_for_status()
@@ -48,8 +51,7 @@ def Page(url):
         for chunk in req.iter_content(100000):
             response.write(chunk)
         response.close()
-    """
-    soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     
     for data in soup.findAll('div', {'class' : 'profile-name'}):
         if 'https://www.tfod.in' + data.find('a').attrs['href'].replace('../../..', '') in firmUrl:
@@ -58,17 +60,16 @@ def Page(url):
             firmUrl.append('https://www.tfod.in' + data.find('a').attrs['href'].replace('../../..', ''))
 
 def firmProfile(firmUrl):
-    """
+    
     try:
-        BeautifulSoup(open(firmUrl.replace('/', '').replace('.', '') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(firmUrl.replace('/', '').replace('.', '') + '.html'), 'lxml')
     except FileNotFoundError:
         req = requests.get(firmUrl, verify = False)
         response = open(firmUrl.replace('/', '').replace('.', '') + '.html', 'wb')
         for chunk in req.iter_content(100000):
             response.write(chunk)
         response.close()
-    """
-    soup = BeautifulSoup(open(firmUrl.replace('/', '').replace('.', '') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(firmUrl.replace('/', '').replace('.', '') + '.html'), 'lxml')
     
     firmImageUrl.append('https://www.tfod.in/' + soup.find('img', {'id' : 'PublicProfileImg'}).attrs['src'])
     
@@ -106,9 +107,9 @@ def firmProfile(firmUrl):
         
         
 def firmProjectsGalleryPageLink(url):
-    """
+    
     try:
-        BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     except FileNotFoundError:
         req = requests.get(url)
         req.raise_for_status()
@@ -116,13 +117,14 @@ def firmProjectsGalleryPageLink(url):
         for chunk in req.iter_content(100000):
             response.write(chunk)
         response.close()
-    """
-    soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     
     projectGalleryUrl = []
     projectGalleryTitle = []
+    projectGalleryTitle1 = []
     projectGalleryImagesUrls = []
     projectGalleryImagesTitles = []
+    
     
     for data in soup.find('table', {'class' : 'project-table'}).findAll('td'):
         projectGalleryUrl.append('https://www.tfod.in/' + data.find('div', {'class' : 'photoMeta'}).find('div', {'class' : 'PhotoTitle'}).find('a').attrs['href'])
@@ -138,11 +140,29 @@ def firmProjectsGalleryPageLink(url):
     projectGalleryImagesUrlsList.append(projectGalleryImagesUrls)
     projectGalleryImagesTitlesList.append(projectGalleryImagesTitles)
     
+    for url in projectGalleryUrl:
+        try:
+            soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        except FileNotFoundError:
+            req = requests.get(url)
+            req.raise_for_status()
+            response = open(url.replace('https://','').replace('.','-').replace('/','-') + '.html', 'wb')
+            for chunk in req.iter_content(100000):
+                response.write(chunk)
+            response.close()
+            soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        
+        name = soup.find('span', {'class' : 'public-heading-tag'}).find('span', {'class' : 'twiter_Name'}).text
+    
+        projectGalleryTitle1.append(name)
+    
+    projectGalleryTitleList1.append(projectGalleryTitle1)
+    
     
 def ImageGallery(url):
-    """
+    
     try:
-        BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     except FileNotFoundError:
         req = requests.get(url)
         req.raise_for_status()
@@ -150,13 +170,12 @@ def ImageGallery(url):
         for chunk in req.iter_content(100000):
             response.write(chunk)
         response.close()
-    """
-    soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
+        soup = BeautifulSoup(open(url.replace('https://','').replace('.','-').replace('/','-') + '.html'), 'lxml')
     
     ImageUrl = []
     ImageTitle = []
     ImageUrlList = []
-    ImageTitleList = []
+    ImageTitleList = []    
     
     for data in soup.findAll('a', {'class' : 'thumbnailSlider'}):
         ImageUrl.append('https://www.tfod.in/' + data.attrs['href'])
@@ -166,6 +185,7 @@ def ImageGallery(url):
 
     for i in range(len(ImageUrl)):
         ImageUrlList.append(ImageUrl[i])
+        
         ImageTitleList.append(ImageTitle[i])
     
     return (ImageUrlList, ImageTitleList)
@@ -176,16 +196,39 @@ for url in pages:
 for link in firmUrl:
     firmProfile(link)
 
-#firmProfile('https://www.tfod.in/Profile-SPACEPLUS')
+#firmProfile('https://www.tfod.in/Profile-atassociates')
 
 for link in projectsPageUrl:
     firmProjectsGalleryPageLink(link)
 
+#Page('https://www.tfod.in/professionals/design-consultants/p/2')
+"""
+for i in range(len(projectGalleryTitleList1)):
+    print (len(projectGalleryTitleList1[i]), len(projectGalleryTitleList[i]))
+    for j in range(len(projectGalleryTitleList1[i])):
+        print (projectGalleryTitleList1[i][j] + ' : ' + projectGalleryTitleList[i][j])
+
+for i in range(len(projectGalleryImagesUrlsList)):
+    print (len(projectGalleryImagesUrlsList[i]))
+    for j in range(len(projectGalleryImagesUrlsList[i])):
+        print (len(projectGalleryImagesUrlsList[i][j]))
+        for k in range(len(projectGalleryImagesUrlsList[i][j])):
+            print (projectGalleryImagesUrlsList[i][j][k])
+"""          
 connection = Connection()
 db = connection.hutstorytfod
 firmCollection = db.firms
 projectCollection = db.projects
 imageGalleryCollection = db.images
+
+"""
+for i in range(len(projectGalleryTitleList)):
+    for j in range(len(projectGalleryTitleList[i])):
+        projectCollection.find_one_and_update({'ProjectImageUrl' : projectGalleryUrlList[i][j]},
+                                {'$set' : {'ProjectImageTitle' : projectGalleryTitleList1[i][j]}})
+""" 
+
+
 for i in range(len(firmUrl)):
     insertFirmData = {"Name" : name[i],
                      "FirmImage" : firmImageUrl[i],
@@ -207,7 +250,7 @@ for i in range(len(firmUrl)):
     FIRMID = firmCollection.insert_one(insertFirmData).inserted_id
     
     for j in range(len(projectGalleryTitleList[i])):
-        insertProjectData = {"ProjectImageTitle" : projectGalleryTitleList[i][j],
+        insertProjectData = {"ProjectImageTitle" : projectGalleryTitleList1[i][j],
                             "ProjectImageUrl" : projectGalleryUrlList[i][j],
                             "firmId" : FIRMID}
         PROJECTID = projectCollection.insert_one(insertProjectData).inserted_id
@@ -217,3 +260,5 @@ for i in range(len(firmUrl)):
                               "ImageOfProjectsUrl" : projectGalleryImagesUrlsList[i][j][k],
                               "projectId" : PROJECTID}
             IMAGEID = imageGalleryCollection.insert_one(insertImageData).inserted_id
+
+print ('1')
